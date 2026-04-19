@@ -2,115 +2,134 @@
 #include <vector>
 using namespace std;
 
-void Druid(int &h, int &dmg, int &res, string name2, string zbran) {
+void Druid(int &h2, int &dmg2, int &res2, string name2, string zbran) {
     cout << "Jste druid, vas dmg je 15, resistance je 10, zivoty je 20." << endl;
    name2 = "Druid";
-    dmg = +15;
-    res = +10;
-    h = +20;
+    dmg2 = +15;
+    res2 = +10;
+    h2 = +20;
     zbran = "kosa";
   
 }
-void Mage(int &h, int &dmg, int &res, string name2, string zbran) {
+void Mage(int &h2, int &dmg2, int &res2, string name2, string zbran) {
     cout << "Jste mage, vas dmg je 30, resistance je 5, zivoty je -10." << endl;
     name2 = "Mage";
-    dmg = +30;
-    res = 5;
-    h = -10;
+    dmg2 = +30;
+    res2 = 5;
+    h2 = -10;
     zbran = "staff";
   
 }
-void Monk(int &h, int &dmg, int &res, string name2, string zbran) {
+void Monk(int &h2, int &dmg2, int &res2, string name2, string zbran) {
     cout << "Jste monk, vas dmg je 20, resistance je 10, zivoty je 15." << endl;
     name2 = "Monk";
     zbran = "fist";
-    dmg = +20;
-    res = +10;
-    h = +15;
+    dmg2 = +20;
+    res2 = +10;
+    h2 = +15;
    
 }
-void Barbarian(int &h, int &dmg, int &res, string name2, string zbran) {
+void Barbarian(int &h2, int &dmg2, int &res2, string name2, string zbran) {
     cout << "Jste barbarian, vas dmg je 20, resistance je 15, zivoty je 50." << endl;
     name2 = "Barbarian";
     zbran = "axe";
-    dmg = +20;
-    res = +15;
-    h = +50;
+    dmg2 = +20;
+    res2 = +15;
+    h2 = +50;
    
 }
-void Artificer(int &h, int &dmg, int &res, string name2, string zbran) {
+void Artificer(int &h2, int &dmg2, int &res2, string name2, string zbran) {
     cout << "Jste artificer, vas dmg je 10, resistance je 20, zivoty je 10." << endl;
     name2 = "Artificer";
     zbran = "gloves";
-    dmg = +10;
-    res = +20;
-    h = +10;
+    dmg2 = +10;
+    res2 = +20;
+    h2 = +10;
   
 }
-void Ninja(int &h, int &dmg, int &res, string name2, string zbran) {
+void Ninja(int &h2, int &dmg2, int &res2, string name2, string zbran) {
     cout << "Jste ninja, vas dmg je 70, resistance je 10, zivoty je 90." << endl;
     name2 = "Ninja";
     zbran = "katana";
-    dmg = +70;
-    res = +10;
-    h = +90;
+    dmg2 = +70;
+    res2 = +10;
+    h2 = +90;
   
 }
-void lide(int &h, int &dmg, int &res, string race) {
+void lide(int &h3, int &dmg3, int &res3, string race) {
     cout << "Jste clovek, vas dmg je 35, resistance je 5, zivoty je -5." << endl;
     race = "Lide";
-    dmg = +35;
-    res = +5;
-    h = -5;
+    dmg3 = +35;
+    res3 = +5;
+    h3 = -5;
   
 }
-void Elf(int &h, int &dmg, int &res, string race) {
+void Elf(int &h3, int &dmg3, int &res3, string race) {
     cout << "Jste elf, vas dmg je 20, resistance je 5, zivoty je 80." << endl;
     race = "Elf";
-    dmg = +20;
-    res = +5;
-    h = +80;
+    dmg3 = +20;
+    res3 = +5;
+    h3 = +80;
   
 }
-void Dwarf(int &h, int &dmg, int &res, string race) {
+void Dwarf(int &h3, int &dmg3, int &res3, string race) {
     cout << "Jste Dwarf, vas dmg je 70, resistance je 5, zivoty je 120." << endl;
     race = "Dwarf";
-    dmg = +70;
-    res = +5;
-    h = +120;
+    dmg3 = +70;
+    res3 = +5;
+    h3 = +120;
   
 }
-void Orc(int &h, int &dmg, int &res, string race) {
+void Orc(int &h3, int &dmg3, int &res3, string race) {
     cout << "Jste Orc, vas dmg je 15, resistance je 15, zivoty je 140." << endl;
     race = "Orc";
-    dmg = +15;
-    res = +15;
-    h = +140;
+    dmg3 = +15;
+    res3 = +15;
+    h3 = +140;
   
 }
-void Dragonborn(int &h, int &dmg, int &res, string race) {
+void Dragonborn(int &h3, int &dmg3, int &res3, string race) {
     cout << "Jste Dragonborn, vas dmg je 10, resistance je 25, zivoty je 110." << endl;
     race = "Dragonborn";
-    dmg = +10;
-    res = +25;
-    h = +110;
+    dmg3 = +10;
+    res3 = +25;
+    h3 = +110;
   
 }
-void kocko_holka(int &h, int &dmg, int &res, string race) {
+void kocko_holka(int &h3, int &dmg3, int &res3, string race) {
     cout << "Jste kocko holka, vas dmg je 15, resistance je 5, zivoty je 90." << endl;
     race = "Kocko Holka";
-    dmg = +15;
-    res = +5;
-    h = +90;
-  
+    dmg3 = +15;
+    res3 = +5;
+    h3 = +90;
+}
+void pridat(int &xp, int &level, int &limit, int body) {
+    xp += body;
+    if (xp >= limit) {
+        level += 1;
+        xp -= limit;
+        limit += 20;
+    }
+}
+void vylecit(int &h, int lektvar, int hmax) {
+    h += lektvar;
+    if(h > hmax) {
+        h = hmax;
+    }
 }
 int main() {
 int dmg = 0;
+int dmg2, dmg3;
 int res = 0;
+int res2, res3;
 int h = 0;
+int h2, h3;
 int rasa;
-int level;
-int xp;
+int level = 1;
+int xp = 0;
+int limit = 100;
+int body;
+
 
 string name2;
 string zbran;
@@ -203,12 +222,16 @@ cout << "Zadejte rasu své postavy: " << endl;
         cout << "Neplatna volba, zadejte cislo mezi 1 a 6." << endl;
 
 }
+h = h2 + h3;
+dmg = dmg2 + dmg3;
+res = res2 + res3;
 
 cout << "Vase postava se jmenuje " << name << endl;
 cout << "Rasa: " << rasa << endl;
 cout << "Role: " << name2 << endl;
 cout << "===Staty===" << endl;
 cout << h << " zivoty" << endl;
+int hmax = h;
 cout << dmg << " dmg" << endl;
 cout << res << " resistance" << endl;
 
@@ -271,21 +294,82 @@ cout << res << " resistance" << endl;
 
     cout << "\nHOSTINSKY: 'Pojd ke mne, " << name << ". Musime si promluvit o tom, co se stalo te noci, kdy se zjevil Oddound .'" << endl;
 
-    if (odpoved == 1) {
-        cout << "\nSTRAZ: 'Vypadas zmatene, clovece. Jdi do hospody, hostinsky ti snad poradi.'" << endl;
-    } 
-    else if (odpoved == 2) {
-        cout << "\nSTRAZ: 'Takhle se mnou mluvit nebudes! Koukej zmizet!'" << endl;
-        cout << "(Budes muset najit jinou cestu dovnitř...)" << endl;
-    } 
-    else {
-        cout << "\nSTRAZ: 'Poutniku s mincemi v kapse? Takove tu vidime radi. Pokracuj.'" << endl;
+        cout << "\nHOSTINSKY: 'Byl jsi jednim z nejlepsich bojovniku krale. Oddound se objevil a porazil te v boji. Myslel jsem, ze jsi mrtvy...'" << endl;
+        cout << "\nHOSTINSKY: 'Musis si vzpomenout, co se stalo a proc jsi tady. Je to dulezite pro tvoji cestu.'" << endl;
+        cout << "\nHOSTINSKY: 'Kdyz si vzpomenes, co ti vzal, budes mit sanci porazit Oddound a zachranit krale.'" << endl;
+        cout << "\nHOSTINSKY: 'Zacni hledat stopy a vzpominky. Vsechny informace, ktere najdes, ti pomohou v boji proti Oddoundovi.'" << endl;
+
+        cout << "\n[Hostinsky ti dal dopis pro krale. Je to tvoje prvni stopa.]" << endl;
+        cout << "Co udelas? (1 = Prohledat dopis / 2 = Ignorovat dopis): ";
+        int volba_dopisu;
+        cin >> volba_dopisu;
+
+        if (volba_dopisu == 1) {
+            cout << "\n[Dopis obsahuje informace o Oddoundovi a jeho plánech.]" << endl;
+        } else if (volba_dopisu == 2) {
+            cout << "\n[Ignorujes dopis a pokracujes ve svem hledani.]" << endl;
+        } else {
+            cout << "Neplatná volba." << endl;
+            return 0;
     }
+cout << "\nHOSTINSKY: 'zde je par veci co te muze pomoct na tve ceste.'" << endl;
+cout << "\n1. 'Vezmi tato zbran. Je to" << zbran << ", neni to tva zbran co jsi pouzil proti Oddoundovi, je to ale aspon neco.'" << endl;
+cout << "2. 'Tady je tento amulet. Je to amulet, ktery jsi my dal jako dar, tady chci abys to mel pomuze ti vic nez me'" << endl;
+cout << "3. 'Tady je tento lektvar. Je to lektvar, ktery ti pomuze ziskat zpet tvoje zivoty a posilnit tvoje schopnosti.'" << endl;
+cout << "[vypijes si lektvar a citis, jak se ti zivoty obnovuji a tvoje schopnosti posilují.]" << endl;
+cout << "\nHOSTINSKY: 'Nezapomente, " << name << ", ze kazda z techto veci ti muze pomoci v boji proti Oddoundovi. Pouzij je moudre.'" << endl;
 
+cout << "\n--- TVOJE CESTA POKRACUJE ---" << endl;
+    cout << "Musis se vydat na cestu, abys nasel dalsi stopy a vzpominky." << endl;
+    cout << "Hodne stesti, " << name << "!" << endl;
+h = hmax;
+cout << "\nVydas se na cestu a po chvili narazis na rozcestí. Cesta vlevo vede do temneho lesa, cesta vpravo vede k opuštěnému hradu." << endl;
+    cout << "Kterou cestou se vydas? (1 = Les / 2 = Hrad): ";
+    int volba_cesty;
+    cin >> volba_cesty;
 
+    if (volba_cesty == 1) {
+        cout << "\nVydal ses do temneho lesa. Po chvili narazis na skupinu banditu!" << endl;
+        cout << "Co udelas? (1 = Utéct / 2 = Bojovat): ";
+        int volba_banditu;
+        cin >> volba_banditu;
 
+        if (volba_banditu == 1) {
+            cout << "Rozhodl ses utéct. Běžíš co nejrychleji, az banditi zmizi v dalce." << endl;
+        } else if (volba_banditu == 2) {
+            cout << "Rozhodl ses bojovat. Bojujes s bandity a nakonec je porazis, ale jsi zraneny." << endl;
+            h = -20;
+            cout << "Ztratil jsi 20 zivotu." << endl;
+            cout << "Zivoty: " << h << endl;
+            xp = +50;
+            cout << "Ziskal jsi 50 zkusenostnich bodu." << endl;
+            cout << "Pokračujes v ceste a doufas, ze se ti uz nic horsiho nestane." << endl;
+        } else {
+            cout << "Neplatná volba." << endl;
+            return 0;
+        }
+    } else if (volba_cesty == 2) {
+        cout << "\nVydal ses k opuštěnému hradu. Po chvili narazis na ducha strazce!" << endl;
+        cout << "Co udelas? (1 = Utéct / 2 = Bojovat): ";
+        int volba_ducha;
+        cin >> volba_ducha;
 
-
-
-
+        if (volba_ducha == 1) {
+            cout << "Rozhodl ses utéct. Běžíš co nejrychleji, az duch zmizi v dalce." << endl;
+        } else if (volba_ducha == 2) {
+            cout << "Rozhodl ses bojovat. Bojujes s duchem a nakonec ho porazis, ale jsi zraneny." << endl;
+            h = -30;
+            cout << "Ztratil jsi 30 zivotu." << endl;
+            cout << "Zivoty: " << h << endl;
+            xp = +80;
+            cout << "Ziskal jsi 80 zkusenostnich bodu." << endl;
+            
+        } else {
+            cout << "Neplatná volba." << endl;
+            return 0;
+        }
+    } else {
+        cout << "Neplatná volba." << endl;
+        return 0;
+    }
 }
