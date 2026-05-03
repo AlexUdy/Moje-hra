@@ -127,7 +127,7 @@ cout << "3. Použít lektvar" << endl;
 cin >> volbaHrac;
 return volbaHrac;
 }
-int dmghrace(int dmg, int /*unused*/) {
+int dmghrace(int dmg, int mindmg) {
     if (dmg <= 0) {
         return 0;
     }
@@ -141,7 +141,7 @@ int nepritelM1 (){
     int volbaNepritel = rand() % 3 + 1;
     return volbaNepritel;
 }
-int dmgnepritelM1(int dmgm1, int /*unused*/) {
+int dmgnepritelM1(int dmgm1, int mindmg) {
     if (dmgm1 <= 0) {
         return 0;
     }
@@ -151,45 +151,27 @@ int dmgnepritelM1(int dmgm1, int /*unused*/) {
     }
     return rand() % (dmgm1 - minDmg + 1) + minDmg;
 }
-void bojM1(int &hp, int &hpNepritel1, int &hpNepritel2, int &hpNepritel3, int &resNepritel1, int &resNepritel2, int &resNepritel3, int dmg, int dmgNepritel1, int dmgNepritel2, int dmgNepritel3) {
+void bojM1(int &hp, int &hpNepritel1, int &resNepritel1, int dmg, int dmgNepritel1) {
     int kolo = 0;
     do {
         kolo += 1;
         cout << "Kolo " << kolo << endl;
         int volbaHrac = hrac();
         int admg = dmghrace(dmg, 0);
+        cout << "Tvuj tah: " << volbaHrac << endl;
+        cout << "Tvoje HP: " << hp << endl;
 
         if(volbaHrac == 1) {
             cout << "Zvolil jsi obranu!" << endl;
             hp += 5;
         } else if(volbaHrac == 2) {
-            int cile;
-            cout << "Na koho utocis? (1 = prvni, 2 = druhy, 3 = treti): ";
-            cin >> cile;
-            if(cile == 1 && hpNepritel1 > 0) {
-                cout << "Utocis na prvniho nepritele." << endl;
+                cout << "Utocis na nepritele." << endl;
                 hpNepritel1 -= admg;
-                cout << "Způsobil jsi " << admg << " poškození prvnimu nepriteli!" << endl;
+                cout << "Způsobil jsi " << admg << " poškození nepriteli!" << endl;
                 if(hpNepritel1 <= 0) {
-                    cout << "Prvni nepritel je porazen!" << endl;
+                    cout << "nepritel je porazen!" << endl;
                 }
-            } else if(cile == 2 && hpNepritel2 > 0) {
-                cout << "Utocis na druheho nepritele." << endl;
-                hpNepritel2 -= admg;
-                cout << "Způsobil jsi " << admg << " poškození druhemu nepriteli!" << endl;
-                if(hpNepritel2 <= 0) {
-                    cout << "Druhy nepritel je porazen!" << endl;
-                }
-            } else if(cile == 3 && hpNepritel3 > 0) {
-                cout << "Utocis na tretiho nepritele." << endl;
-                hpNepritel3 -= admg;
-                cout << "Způsobil jsi " << admg << " poškození treti nepriteli!" << endl;
-                if(hpNepritel3 <= 0) {
-                    cout << "Treti nepritel je porazen!" << endl;
-                }
-            } else {
-                cout << "Vsechny nepratele jsou jiz porazeni." << endl;
-            }
+
         } else if(volbaHrac == 3) {
             cout << "Zvolil jsi se vyhealovat!" << endl;
             hp += 20;
@@ -198,58 +180,23 @@ void bojM1(int &hp, int &hpNepritel1, int &hpNepritel2, int &hpNepritel3, int &r
             continue;
         }
 
-        if(hpNepritel1 <= 0 && hpNepritel2 <= 0 && hpNepritel3 <= 0) {
-            cout << "Všichni nepratele jsou porazeni!" << endl;
-            break;
-        }
-
         if(hpNepritel1 > 0) {
+            cout << "Tah ne nepritel!" << endl;
+            cout << "HP nepritele: " << hpNepritel1 << endl;
             int volbaNepritel = nepritelM1();
             if(volbaNepritel == 1) {
-                cout << "Prvni nepritel zvolil obranu!" << endl;
+                cout << "nepritel zvolil obranu!" << endl;
                 resNepritel1 += 5;
             } else if(volbaNepritel == 2) {
                 int admgM1 = dmgnepritelM1(dmgNepritel1, 0);
                 hp -= admgM1;
-                cout << "Prvni nepritel ti způsobil " << admgM1 << " poškození." << endl;
+                cout << "nepritel ti způsobil " << admgM1 << " poškození." << endl;
             } else if(volbaNepritel == 3) {
-                cout << "Prvni nepritel se vylecil!" << endl;
+                cout << "nepritel se vylecil!" << endl;
                 hpNepritel1 += 20;
             }
         }
-        if(hpNepritel2 > 0) {
-            int volbaNepritel = nepritelM1();
-            if(volbaNepritel == 1) {
-                cout << "Druhy nepritel zvolil obranu!" << endl;
-                resNepritel2 += 5;
-            } else if(volbaNepritel == 2) {
-                int admgM1 = dmgnepritelM1(dmgNepritel2, 0);
-                hp -= admgM1;
-                cout << "Druhy nepritel ti způsobil " << admgM1 << " poškození." << endl;
-            } else if(volbaNepritel == 3) {
-                cout << "Druhy nepritel se vylecil!" << endl;
-                hpNepritel2 += 20;
-            }
-        }
-        if(hpNepritel3 > 0) {
-            int volbaNepritel = nepritelM1();
-            if(volbaNepritel == 1) {
-                cout << "Treti nepritel zvolil obranu!" << endl;
-                resNepritel3 += 5;
-            } else if(volbaNepritel == 2) {
-                int admgM1 = dmgnepritelM1(dmgNepritel3, 0);
-                hp -= admgM1;
-                cout << "Treti nepritel ti způsobil " << admgM1 << " poškození." << endl;
-            } else if(volbaNepritel == 3) {
-                cout << "Treti nepritel se vylecil!" << endl;
-                hpNepritel3 += 20;
-            }
-        }
 
-        cout << "Tvoje HP: " << hp << endl;
-        cout << "HP prvniho nepritele: " << hpNepritel1 << endl;
-        cout << "HP druheho nepritele: " << hpNepritel2 << endl;
-        cout << "HP tretiho nepritele: " << hpNepritel3 << endl;
 
         if(hp <= 0) {
             cout << "Prohral jsi!" << endl;
@@ -257,6 +204,175 @@ void bojM1(int &hp, int &hpNepritel1, int &hpNepritel2, int &hpNepritel3, int &r
         }
     } while(hp > 0);
 }
+void bojM2(int &hp, int hpNepritel[], int resNepritel[], int dmg, int dmgNepritel[], int cil) {
+        int kolo = 0;
+    do {
+        kolo += 1;
+        cout << "Kolo " << kolo << endl;
+        int volbaHrac = hrac();
+        int admg = dmghrace(dmg, 0);
+cout << "tvuj tah!" << endl;
+cout << "Tvoje HP: " << hp << endl;
+cout << "Na koho utocis?" << endl;
+cout << "1. Nepritel 1 (HP: " << hpNepritel[0] << ")" << endl;
+cout << "2. Nepritel 2 (HP: " << hpNepritel[1] << ")" << endl;
+cin >> cil;
+        if(volbaHrac == 1) {
+            cout << "Zvolil jsi obranu!" << endl;
+            hp += 5;
+        } else if(volbaHrac == 2) {
+                cout << "Utocis na nepritele " << cil << endl;
+                hpNepritel[cil - 1] -= admg;
+                cout << "Způsobil jsi " << admg << " poškození nepriteli!" << endl;
+                if(hpNepritel[cil - 1] <= 0) {
+                    cout << "nepritel je porazen!" << endl;
+                }
+
+        } else if(volbaHrac == 3) {
+            cout << "Zvolil jsi se vyhealovat!" << endl;
+            hp += 20;
+        } else {
+            cout << "Neplatná volba!" << endl;
+            continue;
+        }
+                if(hpNepritel[0] > 0) {
+            cout << "Tah ne nepritel!" << endl;
+            cout << "HP nepritele: " << hpNepritel[0] << endl;
+            int volbaNepritel = nepritelM1();
+            if(volbaNepritel == 1) {
+                cout << "nepritel zvolil obranu!" << endl;
+                resNepritel[0] += 5;
+            } else if(volbaNepritel == 2) {
+                int admgM1 = dmgnepritelM1(dmgNepritel[0], 0);
+                hp -= admgM1;
+                cout << "nepritel ti způsobil " << admgM1 << " poškození." << endl;
+            } else if(volbaNepritel == 3) {
+                cout << "nepritel se vylecil!" << endl;
+                hpNepritel[0] += 20;
+            }
+        }
+                        if(hpNepritel[1] > 0) {
+            cout << "Tah 1. nepritele!" << endl;
+            cout << "HP 1. nepritele: " << hpNepritel[1] << endl;
+            int volbaNepritel = nepritelM1();
+            if(volbaNepritel == 1) {
+                cout << "nepritel zvolil obranu!" << endl;
+                resNepritel[1] += 5;
+            } else if(volbaNepritel == 2) {
+                int admgM1 = dmgnepritelM1(dmgNepritel[1], 0);
+                hp -= admgM1;
+                cout << "nepritel ti způsobil " << admgM1 << " poškození." << endl;
+            } else if(volbaNepritel == 3) {
+                cout << "nepritel se vylecil!" << endl;
+                hpNepritel[1] += 20;
+            }
+    }                if(hpNepritel[1] > 0) {
+        cout << "Tah 2. nepritele!" << endl;
+        cout << "HP 2. nepritele: " << hpNepritel[1] << endl;
+        int volbaNepritel = nepritelM1();
+        if(volbaNepritel == 1) {
+            cout << "nepritel zvolil obranu!" << endl;
+            resNepritel[1] += 5;
+        } else if(volbaNepritel == 2) {
+            int admgM1 = dmgnepritelM1(dmgNepritel[1], 0);
+            hp -= admgM1;
+            cout << "nepritel ti způsobil " << admgM1 << " poškození." << endl;
+        } else if(volbaNepritel == 3) {
+            cout << "nepritel se vylecil!" << endl;
+            hpNepritel[1] += 20;
+            }
+        }
+
+} while(hp > 0 && (hpNepritel[0] > 0 || hpNepritel[1] > 0));
+}
+void bojM3(int &hp, int hpNepritel[], int resNepritel[], int dmg, int dmgNepritel[]) {
+  int kolo = 0;
+    do {
+        kolo += 1;
+        cout << "Kolo " << kolo << endl;
+        int volbaHrac = hrac();
+        int admg = dmghrace(dmg, 0);
+        int cil = 0;
+        cout << "tvuj tah!" << endl;
+        cout << "Tvoje HP: " << hp << endl;
+        cout << "Na koho utocis?" << endl;
+        cout << "1. Nepritel 1 (HP: " << hpNepritel[0] << ")" << endl;
+        cout << "2. Nepritel 2 (HP: " << hpNepritel[1] << ")" << endl;
+        cout << "3. Nepritel 3 (HP: " << hpNepritel[2] << ")" << endl;
+        cin >> cil;
+        if(volbaHrac == 1) {
+            cout << "Zvolil jsi obranu!" << endl;
+            hp += 5;
+        } else if(volbaHrac == 2) {
+                if (cil < 1 || cil > 3) {
+                    cout << "Neplatná volba cíle!" << endl;
+                    continue;
+                }
+                cout << "Utocis na nepritele " << cil << endl;
+                hpNepritel[cil - 1] -= admg;
+                cout << "Způsobil jsi " << admg << " poškození nepriteli!" << endl;
+                if(hpNepritel[cil - 1] <= 0) {
+                    cout << "nepritel je porazen!" << endl;
+                }
+
+        } else if(volbaHrac == 3) {
+            cout << "Zvolil jsi se vyhealovat!" << endl;
+            hp += 20;
+        } else {
+            cout << "Neplatná volba!" << endl;
+            continue;
+        }
+                if(hpNepritel[0] > 0) {
+            cout << "Tah 1. nepritele!" << endl;
+            cout << "HP 1. nepritele: " << hpNepritel[0] << endl;
+            int volbaNepritel = nepritelM1();
+            if(volbaNepritel == 1) {
+                cout << "nepritel zvolil obranu!" << endl;
+                resNepritel[0] += 5;
+            } else if(volbaNepritel == 2) {
+                int admgM1 = dmgnepritelM1(dmgNepritel[0], 0);
+                hp -= admgM1;
+                cout << "nepritel ti způsobil " << admgM1 << " poškození." << endl;
+            } else if(volbaNepritel == 3) {
+                cout << "nepritel se vylecil!" << endl;
+                hpNepritel[0] += 20;
+            }
+        }
+                        if(hpNepritel[1] > 0) {
+            cout << "Tah 2. nepritele!" << endl;
+            cout << "HP 2. nepritele: " << hpNepritel[1] << endl;
+            int volbaNepritel = nepritelM1();
+            if(volbaNepritel == 1) {
+                cout << "nepritel zvolil obranu!" << endl;
+                resNepritel[1] += 5;
+            } else if(volbaNepritel == 2) {
+                int admgM1 = dmgnepritelM1(dmgNepritel[1], 0);
+                hp -= admgM1;
+                cout << "nepritel ti způsobil " << admgM1 << " poškození." << endl;
+            } else if(volbaNepritel == 3) {
+                cout << "nepritel se vylecil!" << endl;
+                hpNepritel[1] += 20;
+            }
+    }                if(hpNepritel[2] > 0) {
+        cout << "Tah 3. nepritele!" << endl;
+        cout << "HP 3. nepritele: " << hpNepritel[2] << endl;
+        int volbaNepritel = nepritelM1();
+        if(volbaNepritel == 1) {
+            cout << "nepritel zvolil obranu!" << endl;
+            resNepritel[2] += 5;
+        } else if(volbaNepritel == 2) {
+            int admgM1 = dmgnepritelM1(dmgNepritel[2], 0);
+            hp -= admgM1;
+            cout << "nepritel ti způsobil " << admgM1 << " poškození." << endl;
+        } else if(volbaNepritel == 3) {
+            cout << "nepritel se vylecil!" << endl;
+            hpNepritel[2] += 20;
+            }
+        }
+
+} while(hp > 0 && (hpNepritel[0] > 0 || hpNepritel[1] > 0 || hpNepritel[2] > 0));
+}
+
 
 int main() {
 int dmg = 0;
@@ -269,7 +385,6 @@ int rasa;
 int level = 1;
 int xp = 0;
 int limit = 100;
-int body;
 
 srand(static_cast<unsigned int>(time(NULL)));
 
@@ -464,28 +579,22 @@ cout << "\n--- TVOJE CESTA POKRACUJE ---" << endl;
     int volba_cesty;
     cin >> volba_cesty;
 
-    int hpNepritel1 = 60;
-    int hpNepritel2 = 55;
-    int hpNepritel3 = 50;
-    int dmgNepritel1 = 12;
-    int dmgNepritel2 = 15;
-    int dmgNepritel3 = 18;
-    int resNepritel1 = 5;
-    int resNepritel2 = 5;
-    int resNepritel3 = 5;
+    int hpNepritel[3] = {60, 55, 50};
+    int dmgNepritel[3] = {12, 15, 18};
+    int resNepritel[3] = {5, 5, 5};
 
     if (volba_cesty == 1) {
         cout << "\nVydal ses do temneho lesa. Po chvili narazis na skupinu banditu!" << endl;
         cout << "Co udelas? (1 = zvysit obranu / 2 = Bojovat / 3 = Vylecit): ";
-        bojM1(h, hpNepritel1, hpNepritel2, hpNepritel3, resNepritel1, resNepritel2, resNepritel3, dmg, dmgNepritel1, dmgNepritel2, dmgNepritel3);
+        bojM3(h, hpNepritel, resNepritel, dmg, dmgNepritel);
         xp += 200;
-        pridat(xp, level, limit, body);
+        pridat(xp, level, limit, 200);
     } else if (volba_cesty == 2) {
         cout << "\nVydal ses k opuštěnému hradu. Po chvili narazis na ducha strazce!" << endl;
         cout << "Co udelas? (1 = zvysit obranu / 2 = Bojovat / 3 = Vylecit): ";
-        bojM1(h, hpNepritel1, hpNepritel2, hpNepritel3, resNepritel1, resNepritel2, resNepritel3, dmg, dmgNepritel1, dmgNepritel2, dmgNepritel3);
+        bojM3(h, hpNepritel, resNepritel, dmg, dmgNepritel);
         xp += 50;
-        pridat(xp, level, limit, body);
+        pridat(xp, level, limit, 50);
     } else {
         cout << "Neplatná volba." << endl;
         return 0;
