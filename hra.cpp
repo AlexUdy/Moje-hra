@@ -2,7 +2,14 @@
 #include <vector>
 #include <cstdlib>
 #include <ctime>
+#include <limits>
 using namespace std;
+
+void dalsi() {
+    cout << "\n[Stiskni Enter pro pokračování...]";
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    cin.get();
+}
 
 void Druid(int &h2, int &dmg2, int &res2, string &name2, string &zbran) {
     cout << "Jste druid, vas dmg je 15, resistance je 10, zivoty je 20." << endl;
@@ -104,6 +111,7 @@ void kocko_holka(int &h3, int &dmg3, int &res3, string &race) {
     res3 = +5;
     h3 = +90;
 }
+const int MAX_LEKTVAR = 5;
 void pridat(int &xp, int &level, int &limit, int body) {
     xp += body;
     if (xp >= limit) {
@@ -112,18 +120,37 @@ void pridat(int &xp, int &level, int &limit, int body) {
         limit += 20;
     }
 }
-void vylecit(int &h, int lektvar, int hmax) {
-    h += lektvar;
-    if(h > hmax) {
+int lektvarHealAmount(int hmax, int level) {
+    int percent = 25 + (level - 1) * 4;
+    if (percent > 60) {
+        percent = 60;
+    }
+    int heal = (hmax * percent + 99) / 100;
+    return (heal > 0 ? heal : 1);
+}
+void pouzijLektvar(int &h, int hmax, int level, int &lektvary) {
+    if (lektvary <= 0) {
+        cout << "Nemáš žádné lektvary!" << endl;
+        return;
+    }
+    int heal = lektvarHealAmount(hmax, level);
+    h += heal;
+    if (h > hmax) {
         h = hmax;
     }
+    lektvary -= 1;
+    cout << "Použil jsi lektvar a obnovil " << heal << " životů. Zbývá lektvarů: " << lektvary << endl;
 }
-int hrac (){
+void naplnitLektvary(int &lektvary) {
+    lektvary = MAX_LEKTVAR;
+    cout << "Ve vesnici se ti lektvary doplnily na maximum." << endl;
+}
+int hrac (int lektvary){
 int volbaHrac;
 cout << "---Tvoje kolo!---" << endl;
 cout << "1. Obrana" << endl;
 cout << "2. Bojovat" << endl;
-cout << "3. Použít lektvar" << endl;
+cout << "3. Použít lektvar (" << lektvary << "/" << MAX_LEKTVAR << ")" << endl;
 cin >> volbaHrac;
 return volbaHrac;
 }
@@ -154,33 +181,55 @@ int dmgnepritelM1(int dmgm1, int mindmg) {
     }
     return rand() % (dmgm1 - minDmg + 1) + minDmg;
 }
-int bojM1(int &hp, int &hpNepritel1, int &resNepritel1, int dmg, int dmgNepritel1) {
+int bojM1(int &h, int &hpNepritel1, int &resNepritel1, int dmg, int dmgNepritel1, int resHrace, int &lektvary, int hmax, int level) {
     int kolo = 0;
     do {
         kolo += 1;
         cout << "Kolo " << kolo << endl;
-        int volbaHrac = hrac();
+        int volbaHrac = hrac(lektvary);
         int admg = dmghrace(dmg, 0);
         cout << "Tvuj tah: " << volbaHrac << endl;
-        cout << "Tvoje HP: " << hp << endl;
+        cout << "Tvoje HP: " << h << endl;
+        int resnepTemp = resNepritel1;
 
         if(volbaHrac == 1) {
             cout << "Zvolil jsi obranu!" << endl;
-            hp += 5;
+            resnepTemp += 5;
         } else if(volbaHrac == 2) {
                 cout << "Utocis na nepritele." << endl;
-                hpNepritel1 -= admg;
+
+                int admg = dmghrace(dmg, 0);
+                    double reduction = static_cast<double>(resnepTemp) / (resnepTemp + 100.0);
+                    int reduced = static_cast<int>(admg * (1.0 - reduction) + 0.5);
+                    if (reduced < 0) reduced = 0;
+                        hpNepritel1 -= reduced;
+
                 cout << "Způsobil jsi " << admg << " poškození nepriteli!" << endl;
                 if(hpNepritel1 <= 0) {
                     cout << "nepritel je porazen!" << endl;
+                    hpNepritel1 = 0;
+                    if (lektvary < MAX_LEKTVAR && rand() % 100 < 30) {
+                        lektvary += 1;
+                        cout << "Našel jsi lektvar na těle nepřítele!" << endl;
+                    }
                 }
 
         } else if(volbaHrac == 3) {
-            cout << "Zvolil jsi se vyhealovat!" << endl;
-            hp += 20;
+            cout << "Zvolil jsi se vylecit!" << endl;
+            if (lektvary > 0) {
+                pouzijLektvar(h, hmax, level, lektvary);
+            } else {
+                cout << "Nemáš žádné lektvary! Vyber jinou akci." << endl;
+                continue;
+            }
         } else {
             cout << "Neplatná volba!" << endl;
             continue;
+        }
+
+        int resHraceTemp = resHrace;
+        if (volbaHrac == 1) {
+            resHraceTemp += 5; 
         }
 
         if(hpNepritel1 > 0) {
@@ -192,8 +241,11 @@ int bojM1(int &hp, int &hpNepritel1, int &resNepritel1, int dmg, int dmgNepritel
                 resNepritel1 += 5;
             } else if(volbaNepritel == 2) {
                 int admgM1 = dmgnepritelM1(dmgNepritel1, 0);
-                hp -= admgM1;
-                cout << "nepritel ti způsobil " << admgM1 << " poškození." << endl;
+                double reduction = static_cast<double>(resHraceTemp) / (resHraceTemp + 100.0);
+                int reduced = static_cast<int>(admgM1 * (1.0 - reduction) + 0.5);
+                if (reduced < 0) reduced = 0;
+                h -= reduced;
+                cout << "nepritel ti způsobil " << reduced << " poškození." << endl;
             } else if(volbaNepritel == 3) {
                 cout << "nepritel se vylecil!" << endl;
                 hpNepritel1 += 20;
@@ -201,28 +253,29 @@ int bojM1(int &hp, int &hpNepritel1, int &resNepritel1, int dmg, int dmgNepritel
         }
 
 
-        if(hp <= 0) {
+        if(h <= 0) {
             cout << "Prohral jsi!" << endl;
             break;
         }
-    } while(hp > 0);
+    } while(h > 0);
     return 0;
 }
-int bojM2(int &hp, int hpNepritel[], int resNepritel[], int dmg, int dmgNepritel[], int enemyCount) {
+int bojM2(int &h, int hpNepritel[], int resNepritel[], int dmg, int dmgNepritel[], int enemyCount, int resHrace, int &lektvary, int hmax, int level) {
     int kolo = 0;
     do {
         kolo += 1;
         cout << "Kolo " << kolo << endl;
-        int volbaHrac = hrac();
+        int volbaHrac = hrac(lektvary);
         int admg = dmghrace(dmg, 0);
         int cil = 0;
+        int resnepTemp = resNepritel[0];
 
-        cout << "tvuj tah!" << endl;
-        cout << "Tvoje HP: " << hp << endl;
+        cout << "Tvůj tah!" << endl;
+        cout << "Tvoje HP: " << h << endl;
 
         if (volbaHrac == 1) {
             cout << "Zvolil jsi obranu!" << endl;
-            hp += 5;
+            resnepTemp += 5;
         } else if (volbaHrac == 2) {
             cout << "Na koho utocis?" << endl;
             for (int i = 0; i < enemyCount; ++i) {
@@ -238,18 +291,38 @@ int bojM2(int &hp, int hpNepritel[], int resNepritel[], int dmg, int dmgNepritel
                 continue;
             }
             cout << "Utocis na nepritele " << cil << endl;
-            hpNepritel[cil - 1] -= admg;
+
+            int admg = dmghrace(dmg, 0);
+                    double reduction = static_cast<double>(resnepTemp) / (resnepTemp + 100.0);
+                    int reduced = static_cast<int>(admg * (1.0 - reduction) + 0.5);
+                    if (reduced < 0) reduced = 0;
+
+            hpNepritel[cil - 1] -= reduced;
             cout << "Způsobil jsi " << admg << " poškození nepriteli!" << endl;
             if (hpNepritel[cil - 1] <= 0) {
                 cout << "nepritel je porazen!" << endl;
                 hpNepritel[cil - 1] = 0;
+                if (lektvary < MAX_LEKTVAR && rand() % 100 < 30) {
+                    lektvary += 1;
+                    cout << "Našel jsi lektvar na těle nepřítele!" << endl;
+                }
             }
         } else if (volbaHrac == 3) {
-            cout << "Zvolil jsi se vyhealovat!" << endl;
-            hp += 20;
+            cout << "Zvolil jsi se vylecit!" << endl;
+            if (lektvary > 0) {
+                pouzijLektvar(h, hmax, level, lektvary);
+            } else {
+                cout << "Nemáš žádné lektvary! Vyber jinou akci." << endl;
+                continue;
+            }
         } else {
             cout << "Neplatná volba!" << endl;
             continue;
+        }
+
+        int resHraceTemp = resHrace;
+        if (volbaHrac == 1) {
+            resHraceTemp += 5; 
         }
 
         for (int i = 0; i < enemyCount; ++i) {
@@ -264,27 +337,31 @@ int bojM2(int &hp, int hpNepritel[], int resNepritel[], int dmg, int dmgNepritel
                 resNepritel[i] += 5;
             } else if (volbaNepritel == 2) {
                 int admgM1 = dmgnepritelM1(dmgNepritel[i], 0);
-                hp -= admgM1;
-                cout << "nepritel ti způsobil " << admgM1 << " poškození." << endl;
+                double reduction = static_cast<double>(resHraceTemp) / (resHraceTemp + 100.0);
+                int reduced = static_cast<int>(admgM1 * (1.0 - reduction) + 0.5);
+                if (reduced < 0) reduced = 0;
+                h -= reduced;
+                cout << "nepritel ti způsobil " << reduced << " poškození." << endl;
             } else if (volbaNepritel == 3) {
                 cout << "nepritel se vylecil!" << endl;
                 hpNepritel[i] += 20;
             }
         }
-    } while (hp > 0 && (hpNepritel[0] > 0 || hpNepritel[1] > 0));
+    } while (h > 0 && (hpNepritel[0] > 0 || hpNepritel[1] > 0));
     return 0;
 }
-int bojM3(int &hp, int hpNepritel[], int resNepritel[], int dmg, int dmgNepritel[], int enemyCount) {
+int bojM3(int &h, int hpNepritel[], int resNepritel[], int dmg, int dmgNepritel[], int enemyCount, int resHrace, int &lektvary, int hmax, int level) {
     int kolo = 0;
     do {
         kolo += 1;
         cout << "Kolo " << kolo << endl;
-        int volbaHrac = hrac();
+        int volbaHrac = hrac(lektvary);
         int admg = dmghrace(dmg, 0);
         int cil = 0;
+        int resnepTemp = resNepritel[0];
 
         cout << "Tvůj tah!" << endl;
-        cout << "Tvoje HP: " << hp << endl;
+        cout << "Tvoje HP: " << h << endl;
         cout << "Na koho utocis?" << endl;
         for (int i = 0; i < enemyCount; ++i) {
             cout << i + 1 << ". Nepritel " << i + 1 << " (HP: " << hpNepritel[i] << ")" << endl;
@@ -292,7 +369,7 @@ int bojM3(int &hp, int hpNepritel[], int resNepritel[], int dmg, int dmgNepritel
 
         if (volbaHrac == 1) {
             cout << "Zvolil jsi obranu!" << endl;
-            hp += 5;
+            h += 5;
         } else if (volbaHrac == 2) {
             cin >> cil;
             if (cil < 1 || cil > enemyCount) {
@@ -304,7 +381,12 @@ int bojM3(int &hp, int hpNepritel[], int resNepritel[], int dmg, int dmgNepritel
                 continue;
             }
             cout << "Utocis na nepritele " << cil << endl;
-            hpNepritel[cil - 1] -= admg;
+            int admg = dmghrace(dmg, 0);
+                double reduction = static_cast<double>(resnepTemp) / (resnepTemp + 100.0);
+                int reduced = static_cast<int>(admg * (1.0 - reduction) + 0.5);
+                if (reduced < 0) reduced = 0;
+
+            hpNepritel[cil - 1] -= reduced;
             cout << "Způsobil jsi " << admg << " poškození nepriteli!" << endl;
             if (hpNepritel[cil - 1] <= 0) {
                 cout << "Nepritel je porazen!" << endl;
@@ -312,10 +394,20 @@ int bojM3(int &hp, int hpNepritel[], int resNepritel[], int dmg, int dmgNepritel
             }
         } else if (volbaHrac == 3) {
             cout << "Zvolil jsi se vylecit!" << endl;
-            hp += 20;
+            if (lektvary > 0) {
+                pouzijLektvar(h, hmax, level, lektvary);
+            } else {
+                cout << "Nemáš žádné lektvary! Vyber jinou akci." << endl;
+                continue;
+            }
         } else {
             cout << "Neplatná volba!" << endl;
             continue;
+        }
+
+        int resHraceTemp = resHrace;
+        if (volbaHrac == 1) {
+            resHraceTemp += 5; 
         }
 
         bool zivy = false;
@@ -332,13 +424,16 @@ int bojM3(int &hp, int hpNepritel[], int resNepritel[], int dmg, int dmgNepritel
                 resNepritel[i] += 5;
             } else if (volbaNepritel == 2) {
                 int admgM1 = dmgnepritelM1(dmgNepritel[i], 0);
-                hp -= admgM1;
-                cout << "Nepritel ti způsobil " << admgM1 << " poškození." << endl;
+                double reduction = static_cast<double>(resHraceTemp) / (resHraceTemp + 100.0);
+                int reduced = static_cast<int>(admgM1 * (1.0 - reduction) + 0.5);
+                if (reduced < 0) reduced = 0;
+                h -= reduced;
+                cout << "Nepritel ti způsobil " << reduced << " poškození." << endl;
             } else if (volbaNepritel == 3) {
                 cout << "Nepritel se vylecil!" << endl;
                 hpNepritel[i] += 20;
             }
-            if (hp <= 0) {
+            if (h <= 0) {
                 cout << "Prohral jsi!" << endl;
                 return 0;
             }
@@ -347,9 +442,9 @@ int bojM3(int &hp, int hpNepritel[], int resNepritel[], int dmg, int dmgNepritel
         if (!zivy) {
             break;
         }
-    } while (hp > 0);
+    } while (h > 0);
 
-    if (hp <= 0) {
+    if (h <= 0) {
         return 0;
     }
 
@@ -361,69 +456,96 @@ int bojM3(int &hp, int hpNepritel[], int resNepritel[], int dmg, int dmgNepritel
     cout << "Ziskal jsi " << xpGain << " XP za porazeni " << enemyCount << " nepratel." << endl;
     return xpGain;
 }
-int Miniboss(int &hp, int Mboss, int resMboss, int dmg, int dmgMboss) {
+int Miniboss(int &h, int Mboss, int resMboss, int dmg, int dmgMboss, int resHrace, int &lektvary, int hmax, int level) {
     int kolo = 0;
     int sp = 0;
     do {
         kolo += 1;
         sp += 1;
         cout << "Kolo " << kolo << endl;
-        int volbaHrac = hrac();
+        int volbaHrac = hrac(lektvary);
         int admg = dmghrace(dmg, 0);
         cout << "Tvuj tah: " << volbaHrac << endl;
-        cout << "Tvoje HP: " << hp << endl;
+        cout << "Tvoje HP: " << h << endl;
+        int resminibossTemp = resMboss;
 
         if(volbaHrac == 1) {
             cout << "Zvolil jsi obranu!" << endl;
-            hp += 5;
+            h += 5;
         } else if(volbaHrac == 2) {
                 cout << "Utocis na nepritele." << endl;
-                Mboss -= admg;
+
+                    int admg = dmghrace(dmg, 0);
+                    double reduction = static_cast<double>(resminibossTemp) / (resminibossTemp + 100.0);
+                    int reduced = static_cast<int>(admg * (1.0 - reduction) + 0.5);
+                    if (reduced < 0) reduced = 0;
+                        Mboss -= reduced;
                 cout << "Způsobil jsi " << admg << " poškození nepriteli!" << endl;
                 if(Mboss <= 0) {
                     cout << "nepritel je porazen!" << endl;
+                    Mboss = 0;
+                    if (lektvary < MAX_LEKTVAR && rand() % 100 < 50) {
+                        lektvary += 1;
+                        cout << "Našel jsi lektvar na těle minibosse!" << endl;
+                    }
                 }
 
         } else if(volbaHrac == 3) {
-            cout << "Zvolil jsi se vyhealovat!" << endl;
-            hp += 20;
+            cout << "Zvolil jsi vyléčit!" << endl;
+            if (lektvary > 0) {
+                pouzijLektvar(h, hmax, level, lektvary);
+            } else {
+                cout << "Nemáš žádné lektvary! Vyber jinou akci." << endl;
+                continue;
+            }
         } else {
             cout << "Neplatná volba!" << endl;
             continue;
         }
     
+        int resHraceTemp = resHrace;
+        if (volbaHrac == 1) {
+            resHraceTemp += 5; 
+        }
+
         if(Mboss > 0) {
             cout << "Tah nepritele!" << endl;
             cout << "HP nepritele: " << Mboss << endl;
             if (sp >= 3) {
                 int volbaNepritel = rand() % 3 + 1;
-                if(volbaNepritel == 1) {
-                    cout << "nepritel zvolil obranu!" << endl;
-                    resMboss += 15;
-                } else if(volbaNepritel == 2) {
-                    int admgM1 = dmgnepritelM1(dmgMboss, dmgMboss / 2);
-                    hp -= admgM1;
-                    cout << "nepritel ti způsobil " << admgM1 << " poškození." << endl;
-                } else if(volbaNepritel == 3) {
+                    if(volbaNepritel == 1) {
+                        cout << "nepritel zvolil obranu!" << endl;
+                        resMboss += 15;
+                    } else if(volbaNepritel == 2) {
+                        int admgM1 = dmgnepritelM1(dmgMboss, dmgMboss / 2);
+                        double reduction = static_cast<double>(resHraceTemp) / (resHraceTemp + 100.0);
+                        int reduced = static_cast<int>(admgM1 * (1.0 - reduction) + 0.5);
+                        if (reduced < 0) reduced = 0;
+                        h -= reduced;
+                        cout << "nepritel ti způsobil " << reduced << " poškození." << endl;
+                    } else if(volbaNepritel == 3) {
                     cout << "nepritel se vylecil!" << endl;
                     Mboss += 40;
                 }
-                if(hp <= 0) {
+                if(h <= 0) {
                     cout << "Prohral jsi!" << endl;
                     break;
                 }
             } else {
-                int specialniPoskozeni = dmgnepritelM1(dmgMboss, dmgMboss / 2) * 2;
-                hp -= specialniPoskozeni;
-                cout << "Miniboss provedl specialni utok a zpusobil " << specialniPoskozeni << " poskozeni!" << endl;
-                if(hp <= 0) {
+                int raw = dmgnepritelM1(dmgMboss, dmgMboss / 2) * 2;
+                double reduction = static_cast<double>(resHraceTemp) / (resHraceTemp + 100.0);
+                int reduced = static_cast<int>(raw * (1.0 - reduction) + 0.5);
+                if (reduced < 0) reduced = 0;
+                h -= reduced;
+                cout << "Miniboss provedl specialni utok a zpusobil " << reduced << " poskozeni!" << endl;
+                if(h <= 0) {
                     cout << "Prohral jsi!" << endl;
                     break;
                 }
             }
         }
-    } while(hp > 0 && Mboss > 0);
-    if(hp <= 0) {
+    } while(h > 0 && Mboss > 0);
+    if(h <= 0) {
         return 0;
     } else {
         int xpZisk = rand() % 51 + 100;
@@ -436,7 +558,7 @@ int Miniboss(int &hp, int Mboss, int resMboss, int dmg, int dmgMboss) {
 int main() {
 int dmg = 0;
 int dmg2 = 0, dmg3 = 0;
-int res = 0;
+int resHrace = 0;
 int res2 = 0, res3 = 0;
 int h = 0;
 int h2 = 0, h3 = 0;
@@ -444,6 +566,7 @@ int rasa;
 int level = 1;
 int xp = 0;
 int limit = 100;
+int lektvary = MAX_LEKTVAR;
 
 srand(static_cast<unsigned int>(time(NULL)));
 
@@ -530,7 +653,7 @@ cout << "Zadejte rasu své postavy: " << endl;
 
     h = h2 + h3;
     dmg = dmg2 + dmg3;
-    res = res2 + res3;
+    resHrace = res2 + res3;
 
 cout << "Vase postava se jmenuje " << name << endl;
 cout << "Rasa: " << race << endl;
@@ -539,7 +662,8 @@ cout << "===Staty===" << endl;
 cout << h << " zivoty" << endl;
 int hmax = h;
 cout << dmg << " dmg" << endl;
-cout << res << " resistance" << endl;
+cout << resHrace << " odolnost" << endl;
+cout << "Lektvary: " << lektvary << "/" << MAX_LEKTVAR << endl;
 cout << "Zbran: " << zbran << endl;
 
 
@@ -550,6 +674,7 @@ cout << "Zbran: " << zbran << endl;
     cout << "Nekde na konci teto cesty na tebe ceka Oddound ." << endl;
     cout << "Az si vzpomenes na vse, co ti vzal, budes pripraven ho porazit." << endl;
     cout << "Hodne stesti, " << name << "!" << endl;
+    dalsi();
 
      cout << "\nVstanes a vydas se po uzke stezce." << endl;
     cout << "Na zemi najdes rezavy meč. Seberes ho a citis se o neco jisteji." << endl;
@@ -594,6 +719,7 @@ cout << "Zbran: " << zbran << endl;
     else {
         cout << "\nSTRAZ: 'Poutnik s mincemi? To rad slysim. Nejlepsi pivo maji hned tamhle v hospode.'" << endl;
     }
+    dalsi();
 
     cout << "\n[Vstoupil jsi do hospody U Rudeho Draka. Je tu teplo a citis vuni jidla.]" << endl;
     cout << "U baru stoji stary hostinsky a utira sklenici. Kdyz te uvidi, strne..." << endl;
@@ -608,6 +734,7 @@ cout << "Zbran: " << zbran << endl;
         cout << "\nHOSTINSKY: 'Musis si vzpomenout, co se stalo a proc jsi tady. Je to dulezite pro tvoji cestu.'" << endl;
         cout << "\nHOSTINSKY: 'Kdyz si vzpomenes, co ti vzal, budes mit sanci porazit Oddound a zachranit krale.'" << endl;
         cout << "\nHOSTINSKY: 'Zacni hledat stopy a vzpominky. Vsechny informace, ktere najdes, ti pomohou v boji proti Oddoundovi.'" << endl;
+        dalsi();
 
         cout << "\n[Hostinsky ti dal dopis pro krale. Je to tvoje prvni stopa.]" << endl;
         cout << "Co udelas? (1 = Prohledat dopis / 2 = Ignorovat dopis): ";
@@ -628,6 +755,7 @@ cout << "2. 'Tady je tento amulet. Je to amulet, ktery jsi my dal jako dar, tady
 cout << "3. 'Tady je tento lektvar. Je to lektvar, ktery ti pomuze ziskat zpet tvoje zivoty a posilnit tvoje schopnosti.'" << endl;
 cout << "[vypijes si lektvar a citis, jak se ti zivoty obnovuji a tvoje schopnosti posilují.]" << endl;
 cout << "\nHOSTINSKY: 'Nezapomente, " << name << ", ze kazda z techto veci ti muze pomoci v boji proti Oddoundovi. Pouzij je moudre.'" << endl;
+    dalsi();
 
 cout << "\n--- TVOJE CESTA POKRACUJE ---" << endl;
     cout << "Musis se vydat na cestu, abys nasel dalsi stopy a vzpominky." << endl;
@@ -646,13 +774,13 @@ cout << "\n--- TVOJE CESTA POKRACUJE ---" << endl;
     if (volba_cesty == 1) {
         cout << "\nVydal ses do temneho lesa. Po chvili narazis na skupinu banditu!" << endl;
         cout << "Narazil jsi na " << enemyCount << " nepratele." << endl;
-        int gainedXp = bojM3(h, hpNepritel, resNepritel, dmg, dmgNepritel, enemyCount);
+        int gainedXp = bojM3(h, hpNepritel, resNepritel, dmg, dmgNepritel, enemyCount, resHrace, lektvary, hmax, level);
         xp += gainedXp;
         pridat(xp, level, limit, gainedXp);
     } else if (volba_cesty == 2) {
         cout << "\nVydal ses k opuštěnému hradu. Po chvili narazis na ducha strazce!" << endl;
         cout << "Narazil jsi na " << enemyCount << " nepratele." << endl;
-        int gainedXp = bojM3(h, hpNepritel, resNepritel, dmg, dmgNepritel, enemyCount);
+        int gainedXp = bojM3(h, hpNepritel, resNepritel, dmg, dmgNepritel, enemyCount, resHrace, lektvary, hmax, level);
         xp += gainedXp;
         pridat(xp, level, limit, gainedXp);
     } else {
@@ -666,6 +794,7 @@ cout << "\n--- TVOJE CESTA POKRACUJE ---" << endl;
     cout << "Vzpominas si, ze jsi tu s Oddoundem hledal knihu, ktera obsahovvla tajemstvi kouzelneho kamenu." << endl;
 
     cout << "Pokracujes v ceste a doufas, ze najdes dalsi stopy, ktere ti pomohou porazit Oddounda." << endl;
+    dalsi();
 
      cout << "\n--- TVOJE CESTA POKRACUJE ---" << endl;
     cout << "Chodis po stare ceste po poli" << endl;
@@ -679,7 +808,7 @@ cout << "\n--- TVOJE CESTA POKRACUJE ---" << endl;
     if(hpNepritel[0] <= 0) {
         hpNepritel[0] = 0;
     }
-    int gainedXp = bojM1(h, hpNepritel[0], resNepritel[0], dmg, dmgNepritel[0]);
+    int gainedXp = bojM1(h, hpNepritel[0], resNepritel[0], dmg, dmgNepritel[0], resHrace, lektvary, hmax, level);
     xp += gainedXp;
     pridat(xp, level, limit, gainedXp);
 
@@ -692,6 +821,7 @@ cout << "\n--- TVOJE CESTA POKRACUJE ---" << endl;
         int volba_kaple;
         cin >> volba_kaple;
 
+
         if (volba_kaple == 1) {
             cout << "\nProzkoumavas zvuk!" << endl;
             cout << "Kouknes za rohem a vidis tam nakou osobu v cerne zbroji!" << endl;
@@ -702,8 +832,10 @@ cout << "\n--- TVOJE CESTA POKRACUJE ---" << endl;
             cout << "Osoba se jenom zasměje a řekne: 'Jsem jenom posel, ale mam pro tebe zpravu od Oddounda. On vi, ze jsi vzhuru a je na tebe pripraveny'" << endl;
             cout << "'No teda jestli prezijes me teda'" << endl;
             cout << "Osoba se rozeběhne a utoci na tebe!" << endl;
-
-            int gainedXp = Miniboss(h, hpNepritel[0], resNepritel[0], dmg, dmgNepritel[0]);
+            int hpminiboss = 150;
+            int resminiboss = 15;
+            int dmgminiboss = 35;
+            int gainedXp = Miniboss(h, hpNepritel[0], resNepritel[0], dmg, dmgNepritel[0], resHrace, lektvary, hmax, level);
             xp += gainedXp;
             pridat(xp, level, limit, gainedXp);
         } else if (volba_kaple == 2) {
@@ -711,11 +843,50 @@ cout << "\n--- TVOJE CESTA POKRACUJE ---" << endl;
             cout << "Kouka na tebe a rika: 'Tak ty jsi ten, ktery bojoval s mym sefem, no teda nevypadas jako naky silny bojovnik.'" << endl;
             cout << "'Jsi ci nejsi, stejne te porazim a prinesu tvoji hlavu k oddundovi'" << endl;
             cout << "Temna postava se rozeběhne a utoci na tebe!" << endl;
-            int gainedXp = Miniboss(h, hpNepritel[0], resNepritel[0], dmg, dmgNepritel[0]);
+            int hpminiboss = 150;
+            int resminiboss = 15;
+            int dmgminiboss = 35;
+            int gainedXp = Miniboss(h, hpNepritel[0], resNepritel[0], dmg, dmgNepritel[0], resHrace, lektvary, hmax, level);
             xp += gainedXp;
             pridat(xp, level, limit, gainedXp);
         } else {
             cout << "Neplatná volba." << endl;
             return 0;
         }
+    cout << "\nPo boji se vydas dal a hledas dalsi stopy." << endl;
+    cout << "Jdes po ceste a narazis na starou opustenou vesbnici." << endl;
+    cout << "V ten moment se ti pred ocima mihne obraz: neni to vzpominka predtim nez Oddund se stal mocnym, ale potom." << endl;
+    cout << "Vzpominas si, jak slysis rev nevynych, kdyz ty bojujes proti Oddundovi. " << endl;
+    cout << "Zkousel jsi ho premluvit, ale on se jenom zasměje a řekne: 'Ty jsi jenom slabý bojovnik, nikdy jsi nebyl na me úrovni. Prohral jsi a teď se mnou budeš trpět!'" << endl;
+        dalsi();
+    cout << "Hyperventilujes, vzpominas si na vse spatneho co Oddund udelal, vzpominas si, vzpominas si, jak neschopny jsi byl, jak jsi prohral, jak jsi se vzdal, jak jsi se nechal porazit, jak jsi se nechal zranit, jak jsi se nechal zahanbit, jak jsi se nechal ponizit, jak jsi se nechal zneuzit, jak jsi se nechal zradit, jak jsi se nechal opustit, jak jsi se nechal malem zabit." << endl;
+    cout << "Pak slysis ten hlas znovu, ale tentokrat je to hlas tvé vlastní mysli, která ti říká: 'Nejsi slabý, nejsi neschopný, nejsi poražený. Jsi bojovnik, jsi silný, jsi schopný. Musíš se zvednout a bojovat znovu, aby nikdo uz nebyl ublizen Oddundem!'" << endl;
+    cout << "S těmito slovy se zvedas, a rozhodnes se, ze uz nikdy nebudes porazeny Oddundem. Musis se zvednout a bojovat znovu, abys zachranil krale a vsechny lidi pred Oddundem!" << endl;
+    cout << "\n--- TVOJE CESTA POKRACUJE ---" << endl;
+        dalsi();
+        cout << "Rozhodnes se vydat pres hory, abys nahore dorazil do vesnice co ti muze doplnit zasoby a ziskat informace." << endl;
+        cout << "Pomalu se blizis k vesnici, ale zacnes cejtit hrozne teplo a vidis Plamen v dalce rozebehnes se k nemu a vidis Obrovskeho ohniveho draka, ktery se rozebehne a utoci na tebe!" << endl;
+        dalsi();
+        int hpminiboss = 200;
+        int resminiboss = 35;
+        int dmgminiboss = 25;
+        int gainedXp = Miniboss(h, hpNepritel[0], resNepritel[0], dmg, dmgNepritel[0], resHrace, lektvary, hmax, level);
+        xp += gainedXp;
+        pridat(xp, level, limit, gainedXp);
+
+        dalsi();
+        int h = hmax;
+        cout << "Po boji omdlivas a padas k zemi, probidis se a jsi v baraku, ktery je plny lidi. Vypadas jako hrozny zraneny, ale vsichni se na tebe koukaji s respektem a obdivem." << endl;
+        cout << "Slysis jak lidi rikaji je vzhuru, je to ten bojovnik, ktery porazil toho ohniveho draka!" << endl;
+        cout << "Lidi ti pomahaji a davaji ti jidlo a vodu a leky, abys se zotavil." << endl;
+        dalsi();
+        cout << "\nPo nekolika dnech se zotavujes a jsi zase silny. Lidi ti rikaji, ze jsi hrdina a ze co jsi tu dnes udelal nikdy nazvladnou oplatit!" << endl;
+        cout << "Zamavas lidem a vydas se na cestu, abys nasel a zastavil Oddunda jednou provždy!" << endl;
+
+        cout << "";
+
+
+
+
+    
 }
